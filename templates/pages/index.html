@@ -1,5 +1,16 @@
 {% extends "layout.html" %}
 
 {% block main %}
-    <h1>Seja Bem-Vindo ao seu Sistema de Controle de Estoque profissional. Para começar <a href="/adicionar-item">Adicione um Item</a></h1>
+    <h1>Seja Bem-Vindo ao seu Sistema de Controle de Estoque profissional.</h1>
+    <p>Para começar <a href="/adicionar-item">Adicione um Item</a></p>
+
+    <table>
+        {% include "components/table.html" %}
+    </table>
+
+    <div id="paginacao">
+        {% include "components/paginacao.html" %}
+    </div>
+
+
 {% endblock %}

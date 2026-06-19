@@ -1,0 +1,31 @@
+        {% if pagina_atual > 1 %}
+            <a href="/?pagina={{ pagina_atual - 1 }}" class="btn">Anterior</a>
+        {% endif %}
+
+        {% if pagina_atual > 3 %}
+            <a href="/?pagina=1" class="btn">1</a>
+            {% if pagina_atual > 4 %}
+                <span class="ellipsis">...</span>
+            {% endif %}
+        {% endif %}
+
+        {% for n in range(1, total_paginas + 1) %}
+            {% if n >= pagina_atual - 2 and n <= pagina_atual + 2 %}
+                {% if n == pagina_atual %}
+                    <span class="btn active" style="background-color: #007bff; color: white; font-weight: bold; border-color: #007bff;">{{ n }}</span>
+                {% else %}
+                    <a href="/?pagina={{ n }}" class="btn">{{ n }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if pagina_atual < total_paginas - 2 %}
+            {% if pagina_atual < total_paginas - 3 %}
+                <span class="ellipsis">...</span>
+            {% endif %}
+            <a href="/?pagina={{ total_paginas }}" class="btn">{{ total_paginas }}</a>
+        {% endif %}
+
+        {% if pagina_atual < total_paginas %}
+            <a href="/?pagina={{ pagina_atual + 1 }}" class="btn">Próxima</a>
+        {% endif %}

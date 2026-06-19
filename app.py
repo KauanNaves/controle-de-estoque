@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect
-from database.db import ITENS
+from flask import Flask, render_template, request, redirect, flash
+from database.db import ITENS, ULTIMO_ID_CHAMADO
+import math
 
 app = Flask(__name__)
 
@@ -9,11 +10,68 @@ app.config["SECRET_KEY"] = "SUA-CHAVE-SECRETA-AQUI"
 # Rotas
 @app.route("/")
 def index():
-    return render_template("pages/index.html")
+    # Limite de itens por página
+    POR_PAGINA = 10
 
+    # Captura da página atual na url
+    pagina_atual = request.args.get("pagina", default=1, type=int)
+
+    if pagina_atual < 1:
+        pagina_atual = 1
+
+    total_itens = len(ITENS)
+    total_paginas = math.ceil(total_itens / POR_PAGINA)
+
+    if pagina_atual > total_paginas and total_paginas > 0:
+        pagina_atual = total_paginas
+
+    indice_inicial = (pagina_atual - 1) * POR_PAGINA
+    indice_final = indice_inicial + POR_PAGINA
+
+    itens_paginados = ITENS[indice_inicial:indice_final]
+
+    return render_template(
+        "pages/index.html",
+        itens=itens_paginados,
+        pagina_atual=pagina_atual,
+        total_paginas=total_paginas
+    )
+
+
+###  QUANDO ADICIONADOS ITENS IGUAIS, SOMAR AS QUANTIDADES ###
 @app.route("/adicionar-item", methods=['GET', 'POST'])
 def adicionarItens():
     if request.method == "GET":
         return render_template("pages/adicionarItem.html")
 
+    novoId = ITENS[-1]['id'] + 1
+
+    nomeItem = request.form.get("nomeItem").strip().title()
+    categoriaItem = request.form.get("categoriaItem")
+    quantidade = request.form.get("quantidadeItem")
+    unidadeMedida = request.form.get("medidaItem")
+    tamanhoItem = request.form.get("tamanho")
+
+    for item in ITENS:
+        if item['nome'].title() == nomeItem \
+        and item['categoria'] == categoriaItem \
+        and item['medida'] == unidadeMedida \
+        and item['tamanho'] == tamanhoItem:
+            flash(f"Este item já está cadastrado no sistema. ID do item: {item['id']}!")
+            return redirect("/")
+
+    dictItem = {
+            "id": novoId,
+            "nome": nomeItem,
+            "categoria": categoriaItem,
+            "quantidade": quantidade,
+            "medida": unidadeMedida,
+            "tamanho": tamanhoItem
+    }
+
+    ITENS.append(dictItem)
+    flash("Item adicionado com sucesso!")
+
     return redirect("/")
+    
+

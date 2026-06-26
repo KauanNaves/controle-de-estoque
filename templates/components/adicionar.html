@@ -1,46 +1,41 @@
-<form action="/adicionar-item" method="post">
+<form action="/adicionar-item{% if item and item.id %}?id={{ item.id }}{% endif %}" method="post">
     <label for="nomeItem">Nome do Produto</label>
-    <input type="text" name="nomeItem" id="nome-item" autofocus autocomplete="off">
+    <input type="text" name="nomeItem" id="nome-item" autofocus autocomplete="off" {% if item and item.nome %}value="{{ item.nome }}"{% endif %}>
 
     <label for="categoriaItem">Categoria</label>
     <select name="categoriaItem" id="categoria-item">
-        <option value="" selected disabled>Selecione a Categoria</option>
-        <option value="alimento">Alimento</option>
-        <option value="prodLimpeza">Produtos de Limpeza</option>
-        <option value="prodHigiene">Produtos de Higiene</option>
-        <option value="epi">Equipamentos de Proteção Individual</option>
-        <option value="epc">Equipamentos de Proteção Coletiva</option>
-        <option value="manuMecanica">Manutenção Mecânica</option>
-        <option value="manuEletrica">Manutenção Elétrica</option>
-        <option value="laboratorio">Produtos Laboratório</option>
-        <option value="extra">Outra Categoria</option>
+        <option value="" {% if not item %}selected{% endif %} disabled>Selecione a Categoria</option>
+        {% for cat in categorias %}
+            <option value='{{ cat }}' {% if item and item.categoria %}select{% endif %} >{{ cat | title }}</option>
+        {% endfor %}
     </select>
 
+    {% if item %}
+        <p>CUIDADO!<br>Se estiver adicionando mais itens do mesmo, preste atenção na quantidade existente e some o valor que deseja adicionar antes de preencher esta parte do formulário!</p>
+    {% endif %}
     <label for="quantidadeItem">Quantidade</label>
-    <input type="number" name="quantidadeItem" id="quantidade-item" min="0">
+    <input type="number" name="quantidadeItem" id="quantidade-item" min="0" {% if item and item.quantidade %}value="{{ item.quantidade }}"{% endif %}>
     <label for="medidaItem">Unidade de Medida</label>
     <select name="medidaItem" id="medida-item">
-        <option value="" selected disabled>Selecione a Unidade de Medida</option>
-        <option value="metro">Metro (M)</option>
-        <option value="quilograma">Quilograma (KG)</option>
-        <option value="litro">Litro (L)</option>
-        <option value="peca">Peça (PÇ)</option>
-        <option value="par">Par (PR)</option>
-        <option value="cento">Cento (CT)</option>
-        <option value="milheiro">Milheiro (MIL)</option>
-        <option value="caixa">Caixa (CX)</option>
-        <option value="pacote">Pacote (PCT)</option>
-        <option value="rolo">Rolo (RL)</option>
+        <option value="" {% if not item %}selected{% endif %} disabled>Selecione a Unidade de Medida</option>
+        {% for med in medidas %}
+            <option value='{{ med }}' {% if item and item.medida %}select{% endif %} >{{ med | title }}</option>
+        {% endfor %}
     </select>
 
     <label for="tamanhoItem">Tamanho</label>
     <select name="tamanhoItem" id="tamanho-item">
-        <option value="" selected disabled>Selecione o Tamanho</option>
-        <option value="pequenho">Pequenho (P)</option>
-        <option value="medio">Médio (M)</option>
-        <option value="grande">Grande (G)</option>
-        <option value="grande">Único</option>
+        <option value="" {% if not item %}selected{% endif %} disabled>Selecione o Tamanho</option>
+        {% for tam in tamanhos %}
+            <option value='{{ tam }}' {% if item and item.tamanho %}select{% endif %} >{{ tam | title }}</option>
+        {% endfor %}
     </select>
 
     <button type="submit">Adicionar</button>
 </form>
+
+{% if item %}
+    <form action="/deletar-item?id={{ item.id }}" method="post">
+        <button type="submit">Excluir Item</button>
+    </form>
+{% endif %}

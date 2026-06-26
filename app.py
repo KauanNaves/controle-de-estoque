@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash
-from database.db import ITENS, ULTIMO_ID_CHAMADO
+from database.db import ITENS, CATEGORIAS, MEDIDAS, TAMANHOS
 import math
 
 app = Flask(__name__)
@@ -7,7 +7,9 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SECRET_KEY"] = "SUA-CHAVE-SECRETA-AQUI"
 
-# Rotas
+### MUDAR TUDO QUE USA O ID DO ITEM COMO ÍNDICE ###
+
+# Rota principal
 @app.route("/")
 def index():
     # Limite de itens por página
@@ -38,40 +40,88 @@ def index():
     )
 
 
-###  QUANDO ADICIONADOS ITENS IGUAIS, SOMAR AS QUANTIDADES ###
+# Rota para adicionar e editar itens
 @app.route("/adicionar-item", methods=['GET', 'POST'])
 def adicionarItens():
-    if request.method == "GET":
-        return render_template("pages/adicionarItem.html")
+    if request.method == "POST":
+        id_item = None
+        if request.args.get("id", type=int):
+            id_item = request.args.get("id", type=int)
 
-    novoId = ITENS[-1]['id'] + 1
+        if not id_item:
+            novoId = ITENS[-1]['id'] + 1
 
-    nomeItem = request.form.get("nomeItem").strip().title()
-    categoriaItem = request.form.get("categoriaItem")
-    quantidade = request.form.get("quantidadeItem")
-    unidadeMedida = request.form.get("medidaItem")
-    tamanhoItem = request.form.get("tamanho")
+        nomeItem = request.form.get("nomeItem").strip().title()
+        categoriaItem = request.form.get("categoriaItem")
+        quantidade = request.form.get("quantidadeItem")
+        unidadeMedida = request.form.get("medidaItem")
+        tamanhoItem = request.form.get("tamanhoItem")
 
-    for item in ITENS:
-        if item['nome'].title() == nomeItem \
-        and item['categoria'] == categoriaItem \
-        and item['medida'] == unidadeMedida \
-        and item['tamanho'] == tamanhoItem:
-            flash(f"Este item já está cadastrado no sistema. ID do item: {item['id']}!")
-            return redirect("/")
+        if not id_item:
+            for item in ITENS:
+                if item['nome'].title() == nomeItem \
+                and item['categoria'] == categoriaItem \
+                and item['medida'] == unidadeMedida \
+                and item['tamanho'] == tamanhoItem:
+                    # Não adiciona itens iguais
+                    flash(f"Este item já está cadastrado no sistema. ID do item: {item['id']}!")
+                    return redirect("/")
 
-    dictItem = {
-            "id": novoId,
+        # Adicionando um item que não existe ou atualizando o mesmo
+        dictItem = {
+            "id": novoId if not id_item else id_item,
             "nome": nomeItem,
             "categoria": categoriaItem,
             "quantidade": quantidade,
             "medida": unidadeMedida,
             "tamanho": tamanhoItem
-    }
+        }
 
-    ITENS.append(dictItem)
-    flash("Item adicionado com sucesso!")
+        if id_item:
+            ITENS[id_item] = dictItem
+            flash("Item editado com sucesso!")
+
+        else:
+            ITENS.append(dictItem)
+            flash("Item adicionado com sucesso!")
+
+        return redirect("/")
+
+    if request.method == "GET":
+        item = None
+        id_item = request.args.get("id", type=int)
+        if isinstance(id_item, int) and not isinstance(id_item, bool):
+            for dictItem in ITENS:
+                if dictItem['id'] == id_item:
+                    item = dictItem
+
+        return render_template("pages/adicionarItem.html",
+                                item=item,
+                                categorias=CATEGORIAS,
+                                medidas=MEDIDAS,
+                                tamanhos=TAMANHOS,
+                                )
+
+
+# Rota para apagar itens
+@app.route("/deletar-item", methods=["POST"])
+def deletarItem():
+    id_item = request.args.get("id", type=int)
+    itemAchado = None
+    for item in ITENS:
+        if item['id'] == id_item:
+            itemAchado = item
+
+    if itemAchado:
+        ITENS.remove(itemAchado)
+        flash("Item excluído com sucesso!")
+
+    else:
+        flash("Item não encontrado para exclusão!")
 
     return redirect("/")
-    
+
+
+
+
 

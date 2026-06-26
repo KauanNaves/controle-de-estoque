@@ -8,6 +8,9 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SECRET_KEY"] = "SUA-CHAVE-SECRETA-AQUI"
 
 
+### IMPLEMENTAR SISTEMA DE LOGIN ###
+### IMPLEMENTAR BANCO DE DADOS ###
+
 # Rota principal
 @app.route("/")
 def index():

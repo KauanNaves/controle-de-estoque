@@ -124,6 +124,3 @@ def deletarItem():
     return redirect("/")
 
 
-
-
-

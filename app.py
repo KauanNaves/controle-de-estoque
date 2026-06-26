@@ -7,7 +7,6 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SECRET_KEY"] = "SUA-CHAVE-SECRETA-AQUI"
 
-### MUDAR TUDO QUE USA O ID DO ITEM COMO ÍNDICE ###
 
 # Rota principal
 @app.route("/")
@@ -78,7 +77,10 @@ def adicionarItens():
         }
 
         if id_item:
-            ITENS[id_item] = dictItem
+            for i, item in enumerate(ITENS):
+                if item['id'] == id_item:
+                    ITENS[i] = dictItem 
+
             flash("Item editado com sucesso!")
 
         else:
